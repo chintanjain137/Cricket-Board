@@ -1,0 +1,194 @@
+# 🏏 Gully Cricket Board
+
+A lightweight, **ball-by-ball cricket scoring dashboard** built for gully cricket matches. No backend, no framework — just pure HTML, CSS, and Vanilla JavaScript with localStorage persistence.
+
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
+![No Framework](https://img.shields.io/badge/No%20Framework-000000?style=flat)
+![License](https://img.shields.io/badge/License-Internal-lightgrey?style=flat)
+
+---
+
+## 📸 Preview
+
+> Dark stadium-night theme with live scoreboard, ball history, 2-innings support, and target chasing.
+
+---
+
+## ✨ Features
+
+- 🎯 **Ball-by-ball scoring** — 0, 1, 2, 3, 4, 6 runs + Wide, No Ball, Wicket
+- 📊 **Live scoreboard** — Runs, Wickets, Overs, Run Rate, Extras updated instantly
+- 🔄 **2-Innings support** — Complete 1st innings, then start 2nd with a target to chase
+- 🎯 **Target chasing** — Live "runs needed", "balls left", and Required Run Rate (RRR)
+- 🏆 **Match result** — Auto-detects win by runs, win by wickets, or tie
+- ↩️ **Undo last ball** — Remove the last recorded delivery at any time
+- 📜 **Ball history** — Grouped by over, shown in reverse with colour-coded chips
+- 💾 **LocalStorage persistence** — Full match state restored on page reload
+- 📱 **Responsive** — Works on desktop and mobile
+
+---
+
+## 🗂️ Project Structure
+
+```
+gully-cricket-board/
+│
+├── index.html      ← App shell & all UI markup
+├── style.css       ← Dark theme, button styles, responsive layout
+└── app.js          ← All game logic, state management, rendering
+```
+
+---
+
+## 🚀 Getting Started
+
+No install, no build step required.
+
+**Option 1 — Open locally:**
+```bash
+git clone https://github.com/YOUR_USERNAME/gully-cricket-board.git
+cd gully-cricket-board
+# Just open index.html in any browser
+open index.html
+```
+
+**Option 2 — Live via Netlify Drop:**
+1. Go to [netlify.com/drop](https://netlify.com/drop)
+2. Drag and drop the project folder
+3. Get a live URL instantly
+
+**Option 3 — GitHub Pages:**
+1. Push this repo to GitHub
+2. Go to **Settings → Pages → Source → main branch**
+3. Your scorer is live at `https://YOUR_USERNAME.github.io/gully-cricket-board`
+
+---
+
+## 🏏 How to Use
+
+### Starting a Match
+1. Open the app — you'll see the **Set Total Overs** screen
+2. Pick from quick options (4, 6, 8, 10, 12, 20) or enter a custom number
+3. Press **START** — 1st innings begins
+
+### Scoring
+| Button | Action |
+|--------|--------|
+| `0` `1` `2` `3` | Run scored, legal ball |
+| `4` | Boundary four, legal ball |
+| `6` | Boundary six, legal ball |
+| `WIDE` | +1 run, +1 extra, ball NOT counted |
+| `NO BALL` | +1 run, +1 extra, ball NOT counted |
+| `WICKET` | +1 wicket, legal ball |
+| `↩ UNDO` | Remove the last recorded ball |
+| `NEW MATCH` | Clear all data, start fresh |
+
+### 2nd Innings
+- When 1st innings ends (overs complete or 10 wickets), a banner shows the final score
+- Press **▶ START 2ND INNINGS** to begin chasing
+- Target bar shows: runs needed · balls left · Required Run Rate
+- Match result is declared automatically
+
+---
+
+## ⚙️ Scoring Rules
+
+**Legal deliveries** (increase ball count):
+- Any run (0–6)
+- Wicket
+
+**Illegal deliveries** (do NOT increase ball count):
+- Wide → +1 run, +1 extra
+- No Ball → +1 run, +1 extra
+
+**Over calculation:**
+```
+overs  = floor(legalBalls / 6)
+balls  = legalBalls % 6
+display = "3.4"  ← means 3 overs, 4 balls
+```
+
+**Run Rate:**
+```
+RR = runs / (overs + balls/6)
+```
+
+**Innings ends when:**
+- All overs are bowled, OR
+- 10 wickets have fallen
+
+---
+
+## 🧠 Data Structure
+
+Match object stored in `localStorage` under key `gullyMatch`:
+
+```json
+{
+  "totalOvers": 6,
+  "currentInnings": 1,
+  "innings1": {
+    "balls": [
+      { "type": "run", "value": 1 },
+      { "type": "run", "value": 4 },
+      { "type": "wide" },
+      { "type": "wicket" }
+    ]
+  },
+  "innings2": null
+}
+```
+
+Ball types: `run` · `wicket` · `wide` · `noball`
+
+---
+
+## 🎨 UI Design
+
+| Element | Color |
+|---------|-------|
+| Background | `#0A0A0F` |
+| Cards | `#1A1A26` |
+| Accent | `#00D4FF` |
+| Run buttons | Blue `#2563EB` |
+| Boundary 4 | Green `#16A34A` |
+| Boundary 6 | Purple `#7C3AED` |
+| Wicket | Red `#DC2626` |
+| Wide | Orange `#EA580C` |
+| No Ball | Yellow `#CA8A04` |
+| Undo | Grey `#374151` |
+
+Fonts: **Bebas Neue** (display) · **Rajdhani** (body) · **Share Tech Mono** (scores)
+
+---
+
+## 🔮 Planned Enhancements
+
+- [ ] Run worm chart (over-by-over graph)
+- [ ] Match history (multiple matches)
+- [ ] Export scorecard as PDF/image
+- [ ] Player names & batting/bowling stats
+- [ ] Partnership tracker
+- [ ] Custom team names
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Markup | HTML5 |
+| Styling | CSS3 (custom properties, grid, flexbox) |
+| Logic | Vanilla JavaScript (ES6+, IIFE pattern) |
+| Storage | Browser LocalStorage |
+| Fonts | Google Fonts |
+| Hosting | Netlify / GitHub Pages |
+
+---
+
+## 📄 License
+
+Internal project — built for gully cricket scoring.  
+Free to use, modify, and share with your cricket group. 🏏

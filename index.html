@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gully Cricket Board</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <span class="cricket-icon">🏏</span>
+        <div>
+          <div class="header-title">GULLY CRICKET</div>
+          <div class="header-subtitle">LIVE SCORER</div>
+        </div>
+      </div>
+      <div class="header-controls">
+        <button id="btnNewMatch" class="btn btn-new">NEW MATCH</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- SETUP PANEL -->
+  <div id="setupPanel" class="setup-panel hidden">
+    <div class="setup-card">
+      <div class="setup-title">SET TOTAL OVERS</div>
+      <div class="overs-selector">
+        <button class="over-opt" data-val="4">4</button>
+        <button class="over-opt" data-val="6">6</button>
+        <button class="over-opt" data-val="8">8</button>
+        <button class="over-opt" data-val="10">10</button>
+        <button class="over-opt" data-val="12">12</button>
+        <button class="over-opt" data-val="20">20</button>
+      </div>
+      <div class="custom-overs-row">
+        <input type="number" id="customOvers" placeholder="Custom..." min="1" max="50"/>
+        <button id="btnStartMatch">START</button>
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; justify-content: center; align-items: center;">
+    <div class="overlay" style="color: beige;">Developed by Gully Cricket</div>
+    <a href="https://www.google.com" class="toast" style="text-decoration: none; color: aqua;">@2026 Gully Cricket</a>
+  </div>
+  <!-- MAIN CONTENT -->
+  <main id="mainContent" class="main-content hidden">
+
+    <!-- INNINGS BADGE -->
+    <div id="inningsBadge" class="innings-badge badge-inn1">1ST INNINGS</div>
+
+    <!-- 1ST INNINGS SUMMARY (visible during 2nd innings) -->
+    <div id="inn1Summary" class="inn1-summary hidden">
+      <span id="inn1Score"></span>
+    </div>
+
+    <!-- TARGET BAR (2nd innings only) -->
+    <div id="targetBar" class="target-bar hidden">
+      <span id="targetNeeded" class="target-needed"></span>
+      <span id="targetBallsLeft" class="target-sub"></span>
+      <span id="targetRRR" class="target-sub"></span>
+    </div>
+
+    <!-- SCOREBOARD -->
+    <section class="scoreboard">
+      <div class="score-primary">
+        <span id="scoreRuns">0</span>
+        <span class="score-sep">/</span>
+        <span id="scoreWickets">0</span>
+      </div>
+      <div class="score-secondary">
+        <div class="stat-block">
+          <div class="stat-value" id="scoreOvers">0.0</div>
+          <div class="stat-label">OVERS</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-block">
+          <div class="stat-value" id="scoreRR">0.00</div>
+          <div class="stat-label">RUN RATE</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-block">
+          <div class="stat-value" id="scoreExtras">0</div>
+          <div class="stat-label">EXTRAS</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-block">
+          <div class="stat-value" id="totalOversDisplay">6</div>
+          <div class="stat-label">TOTAL OVR</div>
+        </div>
+      </div>
+      <div class="last-ball-row" id="lastBallRow">
+        <span class="last-ball-label">LAST BALL</span>
+        <span id="lastBallBadge" class="ball-badge">—</span>
+      </div>
+    </section>
+
+    <!-- CURRENT OVER -->
+    <section class="current-over-section">
+      <div class="current-over-label">CURRENT OVER</div>
+      <div id="currentOverBalls" class="current-over-balls"></div>
+    </section>
+
+    <!-- 1ST INNINGS COMPLETE BANNER -->
+    <div id="inn1CompleteBanner" class="inn1-complete-banner hidden">
+      <div class="inn1-banner-title">🏏 1ST INNINGS COMPLETE</div>
+      <div class="inn1-banner-score" id="inn1FinalScore"></div>
+      <button id="btnStartInn2" class="btn btn-start-inn2">▶ START 2ND INNINGS</button>
+    </div>
+
+    <!-- MATCH RESULT BANNER -->
+    <div id="matchResultBanner" class="match-result-banner hidden">
+      <div id="matchResultText"></div>
+    </div>
+
+    <!-- SCORING BUTTONS (hidden during 1st innings complete waiting) -->
+    <section class="scoring-section">
+      <div class="section-label">RUNS</div>
+      <div class="run-buttons">
+        <button class="btn btn-run" data-run="0">0</button>
+        <button class="btn btn-run" data-run="1">1</button>
+        <button class="btn btn-run" data-run="2">2</button>
+        <button class="btn btn-run" data-run="3">3</button>
+        <button class="btn btn-run btn-four" data-run="4">4</button>
+        <button class="btn btn-run btn-six" data-run="6">6</button>
+      </div>
+    </section>
+
+    <section class="scoring-section">
+      <div class="section-label">EXTRAS & WICKET</div>
+      <div class="extras-buttons">
+        <button class="btn btn-wide" id="btnWide">WIDE</button>
+        <button class="btn btn-noball" id="btnNoball">NO BALL</button>
+        <button class="btn btn-wicket" id="btnWicket">WICKET</button>
+      </div>
+    </section>
+
+    <section class="scoring-section">
+      <button class="btn btn-undo full-width" id="btnUndo">↩ UNDO LAST BALL</button>
+    </section>
+
+    <!-- BALL HISTORY -->
+    <section class="history-section">
+      <div class="history-header">
+        <span class="section-label">BALL HISTORY</span>
+        <span id="historyCount" class="history-count"></span>
+      </div>
+      <div id="ballHistory" class="ball-history"></div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
