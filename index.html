@@ -43,10 +43,7 @@
       </div>
     </div>
   </div>
-  <div style="display: flex; justify-content: center; align-items: center;">
-    <div class="overlay" style="color: beige;">Developed by Gully Cricket</div>
-    <a href="https://www.google.com" class="toast" style="text-decoration: none; color: aqua;">@2026 Gully Cricket</a>
-  </div>
+
   <!-- MAIN CONTENT -->
   <main id="mainContent" class="main-content hidden">
 
@@ -153,6 +150,19 @@
     </section>
 
   </main>
+
+  <!-- NEW MATCH CONFIRM POPUP -->
+  <div id="newMatchOverlay" class="popup-overlay hidden">
+    <div class="popup-card">
+      <div class="popup-icon">🏏</div>
+      <div class="popup-title">START NEW MATCH?</div>
+      <div class="popup-body">All current match data will be cleared. This cannot be undone.</div>
+      <div class="popup-actions">
+        <button id="popupCancel" class="popup-btn popup-btn-cancel">CANCEL</button>
+        <button id="popupConfirm" class="popup-btn popup-btn-confirm">YES, NEW MATCH</button>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>

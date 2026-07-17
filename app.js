@@ -2,6 +2,7 @@
  * GULLY CRICKET BOARD — app.js
  * Rebuilt: all DOM refs fetched fresh, no stale captures.
  * Full 2-innings support with target chasing & result.
+ * Custom popup replaces browser confirm() for New Match.
  */
 (function () {
   'use strict';
@@ -11,9 +12,22 @@
 
   let match = null;
 
-  /* ── tiny helper: always fetch fresh ── */
-  function el(id) { return document.getElementById(id); }
+  /* ── tiny helpers ── */
+  function el(id)   { return document.getElementById(id); }
   function qsa(sel) { return document.querySelectorAll(sel); }
+  function show(id) { el(id).classList.remove('hidden'); }
+  function hide(id) { el(id).classList.add('hidden'); }
+
+  /* ─────────────────────────────────────
+     POPUP (replaces browser confirm)
+  ───────────────────────────────────── */
+  function showNewMatchPopup() {
+    show('newMatchOverlay');
+  }
+
+  function hideNewMatchPopup() {
+    hide('newMatchOverlay');
+  }
 
   /* ─────────────────────────────────────
      INIT
@@ -42,7 +56,21 @@
       });
     });
     el('btnStartMatch').addEventListener('click', handleStart);
-    el('btnNewMatch').addEventListener('click', handleNewMatch);
+
+    /* NEW MATCH → show popup */
+    el('btnNewMatch').addEventListener('click', showNewMatchPopup);
+
+    /* Popup buttons */
+    el('popupCancel').addEventListener('click',  hideNewMatchPopup);
+    el('popupConfirm').addEventListener('click', () => {
+      hideNewMatchPopup();
+      doNewMatch();
+    });
+
+    /* close popup when clicking the dark overlay itself */
+    el('newMatchOverlay').addEventListener('click', function (e) {
+      if (e.target === this) hideNewMatchPopup();
+    });
 
     /* scoring buttons */
     qsa('.btn-run').forEach(btn => {
@@ -53,7 +81,7 @@
     el('btnWicket').addEventListener('click', () => recordBall({ type: 'wicket' }));
     el('btnUndo').addEventListener('click',   handleUndo);
 
-    /* innings transition — use event delegation so it works even if hidden at load */
+    /* innings transition — event delegation so it works when hidden at load */
     document.addEventListener('click', function (e) {
       if (e.target && e.target.id === 'btnStartInn2') handleStartInn2();
     });
@@ -80,11 +108,7 @@
     showMain();
   }
 
-  function handleNewMatch() {
-    const inn = activeInnings();
-    if (inn && inn.balls.length > 0) {
-      if (!confirm('Start a new match? Current data will be cleared.')) return;
-    }
+  function doNewMatch() {
     clearStorage();
     match = null;
     qsa('.over-opt').forEach(b => b.classList.remove('selected'));
@@ -109,11 +133,8 @@
     if (!innings) return;
 
     const stats = calcStats(innings.balls, match.totalOvers);
-
-    /* block if current innings already done */
     if (stats.inningsComplete) return;
 
-    /* in 2nd innings: block if target already passed (shouldn't normally be reachable) */
     if (match.currentInnings === 2) {
       const target = calcStats(match.innings1.balls, match.totalOvers).runs + 1;
       if (stats.runs >= target) return;
@@ -144,8 +165,8 @@
   function calcStats(balls, totalOvers) {
     let runs = 0, wickets = 0, extras = 0, legalBalls = 0;
     for (const ball of balls) {
-      if (ball.type === 'run')    { runs += ball.value; legalBalls++; }
-      else if (ball.type === 'wicket') { wickets++;         legalBalls++; }
+      if      (ball.type === 'run')    { runs += ball.value; legalBalls++; }
+      else if (ball.type === 'wicket') { wickets++;          legalBalls++; }
       else if (ball.type === 'wide')   { runs++; extras++; }
       else if (ball.type === 'noball') { runs++; extras++; }
     }
@@ -179,10 +200,10 @@
   }
 
   function getBallLabel(ball) {
-    if (ball.type === 'run')     return ball.value === 0 ? '•' : String(ball.value);
-    if (ball.type === 'wicket')  return 'W';
-    if (ball.type === 'wide')    return 'WD';
-    if (ball.type === 'noball')  return 'NB';
+    if (ball.type === 'run')    return ball.value === 0 ? '•' : String(ball.value);
+    if (ball.type === 'wicket') return 'W';
+    if (ball.type === 'wide')   return 'WD';
+    if (ball.type === 'noball') return 'NB';
     return '?';
   }
 
@@ -208,9 +229,6 @@
     s.classList.add('flash');
   }
 
-  function show(id)  { el(id).classList.remove('hidden'); }
-  function hide(id)  { el(id).classList.add('hidden'); }
-
   /* ─────────────────────────────────────
      RENDER
   ───────────────────────────────────── */
@@ -222,12 +240,12 @@
     const activeBalls = isInn2 && match.innings2 ? match.innings2.balls : match.innings1.balls;
     const activeStats = calcStats(activeBalls, match.totalOvers);
 
-    /* ── innings badge ── */
+    /* innings badge */
     const badge = el('inningsBadge');
     badge.textContent = isInn2 ? '2ND INNINGS' : '1ST INNINGS';
     badge.className   = 'innings-badge ' + (isInn2 ? 'badge-inn2' : 'badge-inn1');
 
-    /* ── main scoreboard ── */
+    /* scoreboard */
     el('scoreRuns').textContent         = activeStats.runs;
     el('scoreWickets').textContent      = activeStats.wickets;
     el('scoreOvers').textContent        = activeStats.oversDisplay + ' / ' + match.totalOvers;
@@ -235,21 +253,21 @@
     el('scoreExtras').textContent       = activeStats.extras;
     el('totalOversDisplay').textContent = match.totalOvers;
 
-    /* ── last ball ── */
-    const badge2 = el('lastBallBadge');
+    /* last ball */
+    const lb = el('lastBallBadge');
     if (activeBalls.length > 0) {
       const last = activeBalls[activeBalls.length - 1];
-      badge2.textContent = getBallLabel(last);
-      badge2.className   = 'ball-badge ball-chip ' + getBallChipClass(last);
+      lb.textContent = getBallLabel(last);
+      lb.className   = 'ball-badge ball-chip ' + getBallChipClass(last);
     } else {
-      badge2.textContent = '—';
-      badge2.className   = 'ball-badge';
+      lb.textContent = '—';
+      lb.className   = 'ball-badge';
     }
 
-    /* ── current over ── */
+    /* current over */
     renderCurrentOver(activeStats, activeBalls);
 
-    /* ── 1st innings summary strip (only in 2nd innings) ── */
+    /* 1st innings summary strip */
     if (isInn2) {
       show('inn1Summary');
       el('inn1Score').textContent = '1st Innings: ' + inn1Stats.runs + '/' + inn1Stats.wickets + ' (' + inn1Stats.oversDisplay + ')';
@@ -257,7 +275,7 @@
       hide('inn1Summary');
     }
 
-    /* ── target bar (only in 2nd innings) ── */
+    /* target bar */
     if (isInn2) {
       const target    = inn1Stats.runs + 1;
       const runsLeft  = Math.max(0, target - activeStats.runs);
@@ -271,16 +289,16 @@
       hide('targetBar');
     }
 
-    /* ── decide which banner (if any) to show ── */
+    /* banners */
     const inn1Done    = inn1Stats.inningsComplete;
-    const waitingInn2 = inn1Done && !match.innings2;   // 1st complete, haven't started 2nd yet
+    const waitingInn2 = inn1Done && !match.innings2;
 
     let matchOver = false;
     let resultText = '';
 
     if (isInn2) {
-      const target = inn1Stats.runs + 1;
-      const chased = activeStats.runs >= target;
+      const target   = inn1Stats.runs + 1;
+      const chased   = activeStats.runs >= target;
       const inn2Done = activeStats.inningsComplete;
 
       if (chased || inn2Done) {
@@ -291,14 +309,13 @@
           resultText = 'Team 2 WON by ' + wktsLeft + ' wickets (' + ballsLeft + ' balls to spare) 🏆';
         } else {
           const diff = inn1Stats.runs - activeStats.runs;
-          if (diff > 0)       resultText = 'Team 1 WON by ' + diff + ' runs 🏆';
+          if (diff > 0)        resultText = 'Team 1 WON by ' + diff + ' runs 🏆';
           else if (diff === 0) resultText = 'MATCH TIED 🤝';
           else                 resultText = 'Team 2 WON 🏆';
         }
       }
     }
 
-    /* banners: only one shown at a time */
     if (matchOver) {
       hide('inn1CompleteBanner');
       show('matchResultBanner');
@@ -315,17 +332,13 @@
       setButtonsDisabled(false);
     }
 
-    /* undo is always allowed if balls exist */
     el('btnUndo').disabled = activeBalls.length === 0;
-
-    /* ── history ── */
     renderHistory(activeBalls);
   }
 
   function renderCurrentOver(stats, balls) {
-    const overs = getBallsByOver(balls);
-    const last  = overs.length > 0 ? overs[overs.length - 1] : [];
-    /* if the last group ended on exactly the 6th legal ball it's complete → show empty */
+    const overs    = getBallsByOver(balls);
+    const last     = overs.length > 0 ? overs[overs.length - 1] : [];
     const complete = stats.legalBalls > 0 && stats.ballsInOver === 0;
     const display  = complete ? [] : last;
     el('currentOverBalls').innerHTML = display
@@ -384,7 +397,5 @@
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
   }
 
-  /* ─── BOOT ─── */
   init();
-
 })();
